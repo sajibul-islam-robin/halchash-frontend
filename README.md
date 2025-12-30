@@ -21,21 +21,33 @@ npm run dev
 npm run build
 ```
 
-## Netlify Deployment
+## Vercel Deployment
 
-This project is configured for Netlify deployment:
+This project is configured for Vercel deployment:
 
+1. Connect your repository to Vercel
+2. Set the build settings:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build` (or `pnpm build`)
+   - **Output Directory**: `dist`
+   - **Framework Preset**: Vite
+3. The `vercel.json` file handles SPA routing automatically
+4. Deploy!
+
+The backend API is configured to use: `https://halchash-nodejs-backend.onrender.com`
+
+To override the API URL, create a `.env` file in the frontend directory or set it in Vercel environment variables:
+```
+VITE_API_BASE_URL=https://your-backend-url.com
+```
+
+## Netlify Deployment (Alternative)
+
+If deploying to Netlify instead:
 1. Connect your repository to Netlify
 2. Set the build settings:
    - **Base directory**: `frontend`
    - **Build command**: `npm run build` (or `pnpm build`)
    - **Publish directory**: `frontend/dist`
-3. Deploy!
-
-The backend API is configured to use: `https://halchash-nodejs-backend.onrender.com`
-
-To override the API URL, create a `.env` file in the frontend directory:
-```
-VITE_API_BASE_URL=https://your-backend-url.com
-```
+3. The `netlify.toml` and `public/_redirects` files handle SPA routing
 
