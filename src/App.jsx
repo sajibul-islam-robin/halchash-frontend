@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -9,10 +9,8 @@ import { WishlistProvider } from './context/WishlistContext';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import ScrollToTop from './components/common/ScrollToTop';
+import AdminLayout from './components/admin/AdminLayout';
 import ProtectedRoute from './components/admin/ProtectedRoute';
-import './App.css';
-
-// Public routes - lazy load where appropriate
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -31,43 +29,29 @@ import FAQ from './pages/FAQ';
 import SizeGuide from './pages/SizeGuide';
 import Payment from './pages/Payment';
 import AfterSales from './pages/AfterSales';
-
-// Admin routes - lazy loaded (code splitting)
-const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const AdminProducts = lazy(() => import('./pages/admin/Products'));
-const Categories = lazy(() => import('./pages/admin/Categories'));
-const Orders = lazy(() => import('./pages/admin/Orders'));
-const Users = lazy(() => import('./pages/admin/Users'));
-const Reviews = lazy(() => import('./pages/admin/Reviews'));
-const Coupons = lazy(() => import('./pages/admin/Coupons'));
-const Analytics = lazy(() => import('./pages/admin/Analytics'));
-const Settings = lazy(() => import('./pages/admin/Settings'));
-
-// Loading component for admin routes
-const AdminLoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-      <p className="mt-4 text-gray-600">Loading admin panel...</p>
-    </div>
-  </div>
-);
+import AdminLogin from './pages/admin/AdminLogin';
+import Dashboard from './pages/admin/Dashboard';
+import AdminProducts from './pages/admin/Products';
+import Categories from './pages/admin/Categories';
+import Orders from './pages/admin/Orders';
+import Users from './pages/admin/Users';
+import Reviews from './pages/admin/Reviews';
+import Coupons from './pages/admin/Coupons';
+import Analytics from './pages/admin/Analytics';
+import Settings from './pages/admin/Settings';
+import './App.css';
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Admin Routes - Lazy loaded for code splitting */}
+        {/* Admin Routes */}
         <Route
           path="/admin/login"
           element={
             <AdminAuthProvider>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLogin />
-              </Suspense>
+              <AdminLogin />
             </AdminAuthProvider>
           }
         />
@@ -76,21 +60,19 @@ function App() {
           element={
             <AdminAuthProvider>
               <ProtectedRoute>
-                <Suspense fallback={<AdminLoadingFallback />}>
-                  <AdminLayout>
-                    <Routes>
-                      <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><Dashboard /></Suspense>} />
-                      <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
-                      <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><Categories /></Suspense>} />
-                      <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><Orders /></Suspense>} />
-                      <Route path="users" element={<Suspense fallback={<AdminLoadingFallback />}><Users /></Suspense>} />
-                      <Route path="reviews" element={<Suspense fallback={<AdminLoadingFallback />}><Reviews /></Suspense>} />
-                      <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><Coupons /></Suspense>} />
-                      <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><Analytics /></Suspense>} />
-                      <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><Settings /></Suspense>} />
-                    </Routes>
-                  </AdminLayout>
-                </Suspense>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="categories" element={<Categories />} />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="reviews" element={<Reviews />} />
+                    <Route path="coupons" element={<Coupons />} />
+                    <Route path="analytics" element={<Analytics />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Routes>
+                </AdminLayout>
               </ProtectedRoute>
             </AdminAuthProvider>
           }
