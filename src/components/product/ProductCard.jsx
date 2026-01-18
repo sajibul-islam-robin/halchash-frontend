@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Star, Heart, ShoppingCart, Eye, Zap } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -9,7 +8,7 @@ import { Button } from '../ui/button';
 import QuickViewModal from './QuickViewModal';
 import toast from 'react-hot-toast';
 
-const ProductCard = ({ product, index = 0 }) => {
+const ProductCard = memo(({ product, index = 0 }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -59,10 +58,7 @@ const ProductCard = ({ product, index = 0 }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
+    <div
       onClick={handleCardClick}
       className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer flex flex-col h-full"
     >
@@ -224,9 +220,11 @@ const ProductCard = ({ product, index = 0 }) => {
         isOpen={showQuickView}
         onClose={() => setShowQuickView(false)}
       />
-    </motion.div>
+    </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
 

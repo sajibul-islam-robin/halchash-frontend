@@ -194,60 +194,60 @@ const HeroSection = () => {
                   WebkitBackfaceVisibility: 'hidden'
                 }}
               >
-                <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full">
+                <div className="container mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center h-full py-8 sm:py-12">
                   {/* Content */}
-                  <div className="text-white space-y-6">
-                    <div className="space-y-2">
-                      <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+                  <div className="text-white space-y-3 sm:space-y-4 md:space-y-6 text-center lg:text-left">
+                    <div className="space-y-1 sm:space-y-2">
+                      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                         {slide.title}
                       </h1>
-                      <h2 className="text-3xl md:text-5xl font-semibold">
+                      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold">
                         {slide.subtitle}
                       </h2>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                      <span className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg">
+                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-3 md:space-x-4">
+                      <span className="bg-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-sm sm:text-base md:text-lg">
                         {slide.discount} OFF
                       </span>
-                      <span className="text-xl text-gray-300">
+                      <span className="text-base sm:text-lg md:text-xl text-gray-300">
                         {slide.description}
                       </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center lg:justify-start">
                       <button
                         onClick={() => handleOrderNow(slide.productId)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-colors flex items-center justify-center space-x-2"
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg transition-colors flex items-center justify-center space-x-1.5 sm:space-x-2 w-full sm:w-auto"
                       >
-                        <ShoppingCart className="w-5 h-5" />
+                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>ORDER NOW</span>
                       </button>
                       <button
                         onClick={() => handleAddToCart(slide.productId)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-colors"
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg transition-colors w-full sm:w-auto"
                       >
                         Add to Cart
                       </button>
                       <button
                         onClick={() => handleAddToWishlist(slide.productId)}
-                        className="bg-white/20 hover:bg-white/30 text-white px-6 py-4 rounded-full font-semibold text-lg transition-colors flex items-center justify-center"
+                        className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 sm:px-5 sm:py-3 md:px-6 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg transition-colors flex items-center justify-center w-full sm:w-auto"
                       >
-                        <Heart className="w-5 h-5" />
+                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   </div>
 
                   {/* Image */}
-                  <div className="flex justify-center lg:justify-end">
-                    <div className="relative">
+                  <div className="flex justify-center lg:justify-end order-first lg:order-last">
+                    <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
                       <img
                         src={slide.image}
                         alt={slide.title}
-                        className="w-full max-w-md h-auto rounded-lg shadow-2xl"
+                        className="w-full h-auto rounded-lg shadow-2xl"
                         style={{ 
                           display: 'block',
-                          maxHeight: '500px',
+                          maxHeight: '300px',
                           objectFit: 'contain',
                           width: '100%',
                           height: 'auto'
@@ -256,7 +256,7 @@ const HeroSection = () => {
                           e.target.src = '/api/placeholder/600/400';
                         }}
                       />
-                      <div className="absolute -top-4 -right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm">
+                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 md:-top-4 md:-right-4 bg-red-500 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 rounded-full font-bold text-xs sm:text-sm">
                         {slide.discount}
                       </div>
                     </div>
@@ -272,22 +272,22 @@ const HeroSection = () => {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors z-10"
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 sm:p-3 rounded-full transition-colors z-10"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors z-10"
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 sm:p-3 rounded-full transition-colors z-10"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           </>
         )}
 
         {/* Slide Indicators */}
         {heroProducts.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-1.5 sm:space-x-2 z-10">
             {heroProducts.map((_, index) => (
               <button
                 key={index}
@@ -303,17 +303,17 @@ const HeroSection = () => {
 
       {/* Stats Section */}
       <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 md:py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
                 className="text-center text-white"
               >
-                <div className="text-2xl md:text-3xl font-bold text-red-400">
+                <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-red-400">
                   {stat.number}
                 </div>
-                <div className="text-sm md:text-base text-gray-300">
+                <div className="text-xs sm:text-sm md:text-base text-gray-300">
                   {stat.label}
                 </div>
               </div>

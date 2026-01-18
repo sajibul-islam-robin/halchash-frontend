@@ -63,14 +63,14 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="bg-white py-8 sm:py-10 md:py-12">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* Company Info */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <h3 className="text-2xl font-bold text-red-600 mb-2">Halchash</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <h3 className="text-xl sm:text-2xl font-bold text-red-600 mb-2">Halchash</h3>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                   Halchash is a leading online pharmacy and healthcare store, offering a wide range of medicines, supplements, and wellness products. We ensure authentic products, competitive pricing, and reliable delivery across Bangladesh.
                 </p>
               </div>

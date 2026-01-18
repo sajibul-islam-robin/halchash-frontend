@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef, startTransition } from 'react';
+import React, { useState, useMemo, useEffect, useRef, startTransition, useTransition } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Filter, Search, SlidersHorizontal, Grid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import { Button } from '../components/ui/button';
@@ -50,6 +49,7 @@ const Products = () => {
   const [sortBy, setSortBy] = useState('default');
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [isPending, startFilterTransition] = useTransition();
   
   const maxProductPrice = useMemo(() => {
     if (products.length === 0) {
@@ -246,14 +246,23 @@ const Products = () => {
   }, [products, priceRange]);
 
   const handleCategoryChange = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setCurrentPage(1); // Reset to first page
+    startFilterTransition(() => {
+      setSelectedCategory(categoryId);
+      setCurrentPage(1); // Reset to first page
+    });
   };
 
   const handlePriceRangeChange = (e) => {
     const value = parseInt(e.target.value);
     const nextValue = Number.isFinite(value) ? Math.min(value, sliderMax) : sliderMax;
     setPriceRange([0, nextValue]);
+  };
+
+  const handleSortChange = (newSort) => {
+    startFilterTransition(() => {
+      setSortBy(newSort);
+      setCurrentPage(1);
+    });
   };
 
   const handlePageChange = (page) => {
@@ -274,11 +283,7 @@ const Products = () => {
       {/* Page Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               All Products
             </h1>
@@ -290,7 +295,12 @@ const Products = () => {
                 {error}. Showing available products.
               </p>
             )}
-          </motion.div>
+            {isPending && (
+              <p className="text-sm text-gray-500 mt-2">
+                Updating filters...
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -318,13 +328,18 @@ const Products = () => {
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => {
+                  startFilterTransition(() => {
+                    setSearchQuery(e.target.value);
+                  });
+                }}
+                className="pl-10"
+                disabled={isPending}
+              />
                 </div>
               </div>
 
@@ -401,13 +416,15 @@ const Products = () => {
                 </label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => handleSortChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  disabled={isPending}
                 >
-                  <option value="name">Name (A-Z)</option>
+                  <option value="default">Default</option>
                   <option value="price-low">Price (Low to High)</option>
                   <option value="price-high">Price (High to Low)</option>
                   <option value="rating">Highest Rated</option>
+                  <option value="newest">Newest First</option>
                 </select>
               </div>
             </div>
@@ -437,8 +454,9 @@ const Products = () => {
                 <div className="flex items-center gap-2">
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e) => handleSortChange(e.target.value)}
                     className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    disabled={isPending}
                   >
                     <option value="default">Default</option>
                     <option value="price-low">Price: Low to High</option>
@@ -467,11 +485,8 @@ const Products = () => {
 
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
-              <motion.div
+              <div
                 key={`products-${selectedCategory}-${searchQuery}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
                 className={`grid gap-4 ${
                   viewMode === 'grid' 
                     ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5' 
@@ -485,7 +500,7 @@ const Products = () => {
                     index={index}
                   />
                 ))}
-              </motion.div>
+              </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                 <div className="text-gray-400 mb-4">

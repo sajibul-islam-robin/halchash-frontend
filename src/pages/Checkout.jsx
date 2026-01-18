@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, ShoppingBag, User, Mail, Phone, MapPin } from 'lucide-react';
@@ -13,9 +13,17 @@ import { API_BASE_URL } from '../config/api';
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartItems, getCartTotal, placeOrder, clearCart } = useCart();
+  const { cartItems, placeOrder, clearCart } = useCart();
   const { user, signup } = useAuth();
   const { products } = useProducts();
+  
+  // Calculate cart total locally to avoid context re-renders
+  const cartTotal = useMemo(() => {
+    return cartItems.reduce((total, item) => {
+      const price = item.discountPrice || item.price;
+      return total + (price * item.quantity);
+    }, 0);
+  }, [cartItems]);
   
   // Get product from URL params or location state
   const searchParams = new URLSearchParams(location.search);
@@ -68,7 +76,7 @@ const Checkout = () => {
   const shippingCost = deliveryArea === 'inside_dhaka' ? 60 : 120;
   const subtotal = isSingleProductOrder
     ? (singleProduct.discountPrice || singleProduct.price) * quantity
-    : getCartTotal();
+    : cartTotal;
   const total = subtotal + shippingCost;
 
   const handleQuantityChange = (change) => {

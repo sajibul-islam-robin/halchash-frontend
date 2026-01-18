@@ -77,17 +77,6 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const price = item.discountPrice || item.price;
-      return total + (price * item.quantity);
-    }, 0);
-  };
-
-  const getCartItemsCount = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
-
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
@@ -121,6 +110,8 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Derived values - computed outside context to avoid unnecessary re-renders
+  // These should be computed in components using useMemo when needed
   const value = {
     cartItems,
     isCartOpen,
@@ -128,8 +119,6 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
-    getCartTotal,
-    getCartItemsCount,
     toggleCart,
     setIsCartOpen,
     placeOrder

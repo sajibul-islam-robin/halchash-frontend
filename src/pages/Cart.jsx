@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cartItems, getCartTotal, updateQuantity, removeFromCart, clearCart, placeOrder } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, clearCart, placeOrder } = useCart();
   const { user, signup } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
@@ -20,8 +20,16 @@ const Cart = () => {
   });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
+  // Calculate cart total locally to avoid context re-renders
+  const cartTotal = useMemo(() => {
+    return cartItems.reduce((total, item) => {
+      const price = item.discountPrice || item.price;
+      return total + (price * item.quantity);
+    }, 0);
+  }, [cartItems]);
+
   const shippingCost = 50;
-  const total = getCartTotal() + shippingCost;
+  const total = cartTotal + shippingCost;
 
   const handleQuantityChange = (itemId, change) => {
     const item = cartItems.find(item => item.id === itemId);
@@ -80,7 +88,7 @@ const Cart = () => {
           quantity: item.quantity
         })),
         totals: {
-          subtotal: getCartTotal(),
+          subtotal: cartTotal,
           shipping: shippingCost,
           total
         }
@@ -210,7 +218,7 @@ const Cart = () => {
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items):</span>
-                <span>৳{getCartTotal()}</span>
+                <span>৳{cartTotal}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping:</span>
