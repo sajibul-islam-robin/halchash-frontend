@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, TrendingUp, Gift } from 'lucide-react';
+import { ArrowRight, Sparkles, Gift } from 'lucide-react';
 import HeroSection from '../components/hero/HeroSection';
 import ProductCard from '../components/product/ProductCard';
 import { Button } from '../components/ui/button';
@@ -10,7 +10,6 @@ import { useProducts } from '../context/ProductContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [newsletterEmail, setNewsletterEmail] = useState('');
   const { products, categories, loading, error } = useProducts();
 
   const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
@@ -31,18 +30,14 @@ const Home = () => {
     navigate(`/products?category=${categoryId}`);
   };
 
+  // Helper function to get category ID by slug
+  const getCategoryIdBySlug = (slug) => {
+    const category = categories.find(cat => cat.slug === slug);
+    return category ? category._id : slug;
+  };
+
   // Build a quick lookup of categories that have products
   const productCategorySet = useMemo(() => new Set(products.map(p => p.category).filter(Boolean)), [products]);
-
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (newsletterEmail.trim()) {
-      toast.success('Thank you for subscribing to our newsletter!');
-      setNewsletterEmail('');
-    } else {
-      toast.error('Please enter your email address');
-    }
-  };
 
   if (loading && products.length === 0) {
     return (
@@ -94,11 +89,11 @@ const Home = () => {
               
               return (
                 <motion.div
-                  key={category.id}
+                  key={category._id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  onClick={() => handleCategoryClick(category.id)}
+                  onClick={() => handleCategoryClick(category._id)}
                   className={`${gradientClass} rounded-xl p-6 text-center hover:shadow-xl transition-all duration-300 cursor-pointer group border border-white/50 hover:border-white/80 relative overflow-hidden`}
                 >
                   {/* Subtle pattern overlay */}
@@ -133,8 +128,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-16">
+      {/* New Arrival Products Carousel */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -142,33 +137,61 @@ const Home = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <div className="flex items-center justify-center mb-4">
-              <Sparkles className="w-6 h-6 text-yellow-500 mr-2" />
-              <span className="text-emerald-600 font-semibold uppercase tracking-wide">Featured Products</span>
-            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Best Selling Bengali Products
+              New Arrival Products
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Handpicked selection of our most popular authentic Bengali items
+              Check out our latest additions to the collection
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {featuredProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
+          <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.slice(0, 8).map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <ProductCard product={product} index={index} />
+                </motion.div>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div className="text-center">
-            <Button 
-              size="lg" 
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3"
-              onClick={() => navigate('/products')}
-            >
-              View All Products
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+      {/* Top Selling Products Carousel */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              Top Selling Products
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Most popular products among our customers
+            </p>
+          </motion.div>
+
+          <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.slice(0, 8).map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <ProductCard product={product} index={index} />
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -194,7 +217,7 @@ const Home = () => {
               <Button 
                 variant="outline" 
                 className="hidden md:flex"
-                onClick={() => handleCategoryClick('shari')}
+                onClick={() => handleCategoryClick(getCategoryIdBySlug('shari'))}
               >
                 View All Shari
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -227,7 +250,7 @@ const Home = () => {
               <Button 
                 variant="outline" 
                 className="hidden md:flex"
-                onClick={() => handleCategoryClick('sweets')}
+                onClick={() => handleCategoryClick(getCategoryIdBySlug('sweets'))}
               >
                 View All Sweets
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -260,7 +283,7 @@ const Home = () => {
               <Button 
                 variant="outline" 
                 className="hidden md:flex"
-                onClick={() => handleCategoryClick('bedsheets')}
+                onClick={() => handleCategoryClick(getCategoryIdBySlug('bedsheets'))}
               >
                 View All Home Items
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -274,41 +297,6 @@ const Home = () => {
             </div>
             </div>
           )}
-        </div>
-      </section>
-
-      
-
-      {/* Newsletter Section */}
-      <section className="py-16 bg-emerald-600">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl mx-auto text-white"
-          >
-            <TrendingUp className="w-12 h-12 mx-auto mb-4" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Stay Updated with Bengali Culture
-            </h2>
-            <p className="text-lg mb-8 opacity-90">
-              Subscribe to our newsletter for the latest Bengali products, cultural insights, and exclusive offers.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                required
-              />
-              <Button type="submit" className="bg-white text-emerald-600 hover:bg-gray-100 font-semibold px-6">
-                Subscribe
-              </Button>
-            </form>
-          </motion.div>
         </div>
       </section>
     </div>

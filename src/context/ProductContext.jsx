@@ -78,6 +78,7 @@ const normalizeProduct = (product) => {
       : normalizeNumber(product.stockQuantity ?? 0, 0),
     badge: product.badge || '',
     isActive: product.is_active !== undefined ? Boolean(product.is_active) : Boolean(product.isActive ?? true),
+    isHighlighted: product.is_highlighted !== undefined ? Boolean(product.is_highlighted) : Boolean(product.isHighlighted ?? false),
     features: Array.isArray(product.features) ? product.features : [],
     images: normalizedImages,
     image: fallbackImage,
@@ -87,13 +88,14 @@ const normalizeProduct = (product) => {
 const normalizeCategory = (category) => {
   const categoryId = category._id || category.id || '';
   return {
-    id: category.slug || (categoryId ? String(categoryId) : ''),
+    id: categoryId ? String(categoryId) : '',
     name: category.name || '',
     slug: category.slug || (categoryId ? String(categoryId) : ''),
     icon: category.icon || '',
     image: category.image ? buildImageUrl(category.image) : '',
     description: category.description || '',
     color: category.color || '',
+    _id: categoryId, // Keep the original ObjectId
   };
 };
 
@@ -118,7 +120,7 @@ export const ProductProvider = ({ children }) => {
   };
 
   const fetchProducts = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/products`);
+    const response = await fetch(`${API_BASE_URL}/api/products?limit=20`);
     const data = await response.json();
 
     if (!response.ok || !data.success) {

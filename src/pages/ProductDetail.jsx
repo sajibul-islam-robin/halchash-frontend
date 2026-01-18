@@ -23,16 +23,14 @@ const ProductDetail = () => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { products, loading, error, refreshProducts } = useProducts();
   
-  const productId = Number(id);
-  const product = products.find((p) => {
-    const pIdNum = typeof p.id === 'string' ? parseInt(p.id) : p.id;
-    return pIdNum === productId;
-  });
+  const productId = id; // Keep as string for MongoDB ObjectId
+  const product = products.find((p) => p.id === productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(product);
+  const [loadingProduct, setLoadingProduct] = useState(false);
   const [showQuickCheckout, setShowQuickCheckout] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
@@ -42,12 +40,64 @@ const ProductDetail = () => {
     address: user?.address || ''
   });
 
+  // Fetch individual product if not found in products array
+  const fetchProduct = async (id) => {
+    setLoadingProduct(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      const data = await response.json();
+      if (data.success && data.product) {
+        // Normalize the product data
+        const normalizedProduct = {
+          id: data.product._id || data.product.id || '',
+          slug: data.product.slug || '',
+          name: data.product.name || '',
+          category: data.product.category_id?.slug || data.product.category || '',
+          categoryName: data.product.category_id?.name || '',
+          category_id: data.product.category_id?._id || data.product.category_id || '',
+          description: data.product.description || '',
+          price: Number(data.product.price) || 0,
+          discountPrice: data.product.discount_price !== undefined ? Number(data.product.discount_price) : null,
+          discount: data.product.discount !== undefined ? Number(data.product.discount) : null,
+          rating: Number(data.product.rating) || 0,
+          reviews: Number(data.product.reviews_count || data.product.reviews) || 0,
+          inStock: Boolean(data.product.in_stock ?? data.product.inStock ?? true),
+          stockQuantity: Number(data.product.stock_quantity ?? data.product.stockQuantity) || 0,
+          badge: data.product.badge || '',
+          isActive: Boolean(data.product.is_active ?? data.product.isActive ?? true),
+          isHighlighted: Boolean(data.product.is_highlighted ?? data.product.isHighlighted ?? false),
+          features: Array.isArray(data.product.features) ? data.product.features : [],
+          images: Array.isArray(data.product.images) ? data.product.images.map(img => 
+            img.startsWith('http') ? img : `${API_BASE_URL}${img.startsWith('/') ? img : `/${img}`}`
+          ) : [],
+          image: data.product.image ? (
+            data.product.image.startsWith('http') ? data.product.image : `${API_BASE_URL}${data.product.image.startsWith('/') ? data.product.image : `/${data.product.image}`}`
+          ) : 'https://placehold.co/600x600?text=Product',
+        };
+        setCurrentProduct(normalizedProduct);
+        return normalizedProduct;
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+    } finally {
+      setLoadingProduct(false);
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (product) {
       setCurrentProduct(product);
       fetchReviews();
+    } else if (productId && !loading && products.length > 0) {
+      // Product not found in cached products, try to fetch it individually
+      fetchProduct(productId).then((fetchedProduct) => {
+        if (fetchedProduct) {
+          fetchReviews();
+        }
+      });
     }
-  }, [product, productId]);
+  }, [product, productId, loading, products.length]);
 
   // Update checkout data when user changes
   useEffect(() => {
@@ -81,10 +131,7 @@ const ProductDetail = () => {
   useEffect(() => {
     if (product) {
       // Update local product state with latest rating
-      const updatedProduct = products.find((p) => {
-        const pIdNum = typeof p.id === 'string' ? parseInt(p.id) : p.id;
-        return pIdNum === productId;
-      });
+      const updatedProduct = products.find((p) => p.id === productId);
       if (updatedProduct) {
         setCurrentProduct(updatedProduct);
       }
@@ -104,7 +151,7 @@ const ProductDetail = () => {
   // Define displayProduct early
   const displayProduct = currentProduct || product;
 
-  if (loading && products.length === 0) {
+  if ((loading && products.length === 0) || (loadingProduct && !currentProduct)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Loading product...</p>

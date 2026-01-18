@@ -1,26 +1,56 @@
 import React, { useState, useMemo, useEffect, useRef, startTransition } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Filter, Search, SlidersHorizontal, Grid, List } from 'lucide-react';
+import { Filter, Search, SlidersHorizontal, Grid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useProducts } from '../context/ProductContext';
+import { API_BASE_URL } from '../config/api';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const isSyncingFromUrl = useRef(false);
   const prevSearchRef = useRef(location.search);
-  const { products, categories, loading, error } = useProducts();
+  const { categories, loading: categoriesLoading, error: categoriesError } = useProducts();
+  
+  // Helper function to validate ObjectId
+  const isValidObjectId = (id) => {
+    return /^[0-9a-fA-F]{24}$/.test(id);
+  };
+
+  // Helper function to get category ID from slug or ID
+  const resolveCategoryId = (categoryParam) => {
+    if (!categoryParam || categoryParam === 'all') return 'all';
+    
+    // If it's already a valid ObjectId, use it
+    if (isValidObjectId(categoryParam)) return categoryParam;
+    
+    // Try to find category by slug
+    const category = categories.find(cat => cat.slug === categoryParam);
+    return category ? category._id : 'all';
+  };
+  
+  // Local state for products
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   
   // Initialize from URL params
   const categoryFromUrl = searchParams.get('category') || 'all';
   const searchFromUrl = searchParams.get('search') || '';
   
   const [searchQuery, setSearchQuery] = useState(searchFromUrl);
-  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
+  const [selectedCategory, setSelectedCategory] = useState(() => resolveCategoryId(categoryFromUrl));
   const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [sortBy, setSortBy] = useState('default');
+  const [viewMode, setViewMode] = useState('grid');
+  const [showFilters, setShowFilters] = useState(false);
+  
   const maxProductPrice = useMemo(() => {
     if (products.length === 0) {
       return 10000;
@@ -35,6 +65,83 @@ const Products = () => {
     const rounded = Math.ceil((maxProductPrice || 1000) / 500) * 500;
     return Math.max(1000, rounded);
   }, [maxProductPrice]);
+
+  // Fetch products with pagination
+  const fetchProducts = async (page = 1, category = 'all', search = '', sort = 'default') => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Resolve category to valid ObjectId or 'all'
+      const resolvedCategory = resolveCategoryId(category);
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12', // Optimized limit
+        ...(resolvedCategory !== 'all' && { category: resolvedCategory }),
+        ...(search && { search }),
+        ...(sort !== 'default' && { sort }),
+      });
+      
+      const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load products');
+      }
+      
+      // Normalize products (reuse logic from context)
+      const normalizedProducts = (data.products || []).map(product => {
+        const primaryImage = product.image || (Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '');
+        const imageList = Array.isArray(product.images) ? product.images : [];
+        const normalizedImages = imageList.map(imgPath => {
+          if (!imgPath) return 'https://placehold.co/600x600?text=Product';
+          if (imgPath.startsWith('/src/') || imgPath.startsWith('/public/')) return imgPath;
+          if (/^https?:\/\//i.test(imgPath) || imgPath.startsWith('data:')) return imgPath;
+          const base = API_BASE_URL.replace(/\/$/, '');
+          const normalizedPath = imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
+          if (base.endsWith('/backend') && normalizedPath.startsWith('/backend/')) {
+            return `${base}${normalizedPath.replace('/backend', '')}`;
+          }
+          return `${base}${normalizedPath}`;
+        }).filter(Boolean);
+        const fallbackImage = normalizedImages.length > 0 ? normalizedImages[0] : 'https://placehold.co/600x600?text=Product';
+        
+        return {
+          id: product._id || product.id || '',
+          slug: product.slug || '',
+          name: product.name || '',
+          category: product.category_id?.slug || product.category || '',
+          categoryName: product.category_id?.name || '',
+          category_id: product.category_id?._id || product.category_id || '',
+          description: product.description || '',
+          price: Number(product.price) || 0,
+          discountPrice: product.discount_price !== undefined ? Number(product.discount_price) : null,
+          discount: product.discount !== undefined ? Number(product.discount) : null,
+          rating: Number(product.rating) || 0,
+          reviews: Number(product.reviews_count || product.reviews) || 0,
+          inStock: Boolean(product.in_stock ?? product.inStock ?? true),
+          stockQuantity: Number(product.stock_quantity ?? product.stockQuantity) || 0,
+          badge: product.badge || '',
+          isActive: Boolean(product.is_active ?? product.isActive ?? true),
+          isHighlighted: Boolean(product.is_highlighted ?? product.isHighlighted ?? false),
+          features: Array.isArray(product.features) ? product.features : [],
+          images: normalizedImages,
+          image: fallbackImage,
+        };
+      });
+      
+      setProducts(normalizedProducts);
+      setTotalPages(data.pagination?.pages || 1);
+      setTotalProducts(data.pagination?.total || 0);
+      setCurrentPage(page);
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setError(err.message || 'Failed to load products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setPriceRange((prev) => {
@@ -51,9 +158,18 @@ const Products = () => {
       return prev;
     });
   }, [sliderMax]);
-  const [sortBy, setSortBy] = useState('name');
-  const [viewMode, setViewMode] = useState('grid');
-  const [showFilters, setShowFilters] = useState(false);
+
+  // Fetch products when filters change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('Request timed out. Please try again.');
+    }, 8000); // 8 second timeout
+
+    fetchProducts(1, selectedCategory, searchQuery, sortBy);
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedCategory, searchQuery, sortBy]);
 
   // Sync state with URL when URL changes (e.g., when clicking category in header)
   useEffect(() => {
@@ -65,13 +181,13 @@ const Products = () => {
       const urlSearch = searchParams.get('search') || '';
       
       // Only update if values actually changed to prevent unnecessary re-renders
-      if (urlCategory !== selectedCategory || urlSearch !== searchQuery) {
+      if (resolveCategoryId(urlCategory) !== selectedCategory || urlSearch !== searchQuery) {
         // Mark that we're syncing from URL to prevent circular updates
         isSyncingFromUrl.current = true;
         
         // Use startTransition to mark this as non-urgent update to prevent flickering
         startTransition(() => {
-          setSelectedCategory(urlCategory);
+          setSelectedCategory(resolveCategoryId(urlCategory));
           setSearchQuery(urlSearch);
         });
         
@@ -106,44 +222,43 @@ const Products = () => {
     }
   }, [selectedCategory, searchQuery, setSearchParams, searchParams]);
 
-  // Filter and sort products
+  // Re-resolve category when categories are loaded
+  useEffect(() => {
+    if (!categoriesLoading && categories.length > 0) {
+      const urlCategory = searchParams.get('category') || 'all';
+      if (urlCategory !== 'all' && selectedCategory === 'all') {
+        const resolved = resolveCategoryId(urlCategory);
+        if (resolved !== 'all') {
+          setSelectedCategory(resolved);
+        }
+      }
+    }
+  }, [categories, categoriesLoading, searchParams, selectedCategory]);
+
+  // Filter products (only price range since sorting is done server-side)
   const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return products.filter(product => {
       const productPrice = product.discountPrice || product.price;
       const matchesPrice = productPrice >= priceRange[0] && productPrice <= priceRange[1];
       
-      return matchesSearch && matchesCategory && matchesPrice;
+      return matchesPrice;
     });
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return (a.discountPrice || a.price) - (b.discountPrice || b.price);
-        case 'price-high':
-          return (b.discountPrice || b.price) - (a.discountPrice || a.price);
-        case 'rating':
-          return b.rating - a.rating;
-        case 'name':
-        default:
-          return a.name.localeCompare(b.name);
-      }
-    });
-
-    return filtered;
-  }, [searchQuery, selectedCategory, priceRange, sortBy]);
+  }, [products, priceRange]);
 
   const handleCategoryChange = (categoryId) => {
     setSelectedCategory(categoryId);
+    setCurrentPage(1); // Reset to first page
   };
 
   const handlePriceRangeChange = (e) => {
     const value = parseInt(e.target.value);
     const nextValue = Number.isFinite(value) ? Math.min(value, sliderMax) : sliderMax;
     setPriceRange([0, nextValue]);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    fetchProducts(page, selectedCategory, searchQuery, sortBy);
   };
 
   if (loading && products.length === 0) {
@@ -230,8 +345,8 @@ const Products = () => {
                     All Products ({products.length})
                   </button>
                   {categories.map((category) => {
-                    const categoryId = category.slug || category.id;
-                    const count = products.filter(p => p.category === categoryId).length;
+                    const categoryId = category._id;
+                    const count = products.filter(p => p.category_id === categoryId || p.category === categoryId).length;
                     const hasProducts = count > 0;
                     return (
                       <button
@@ -315,11 +430,23 @@ const Products = () => {
                   </Button>
                   
                   <p className="text-gray-600">
-                    Showing {filteredProducts.length} of {products.length} products
+                    Showing {filteredProducts.length} of {totalProducts} products
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="default">Default</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="newest">Newest First</option>
+                  </select>
+
                   <Button
                     variant={viewMode === 'grid' ? 'default' : 'outline'}
                     size="sm"
@@ -383,15 +510,45 @@ const Products = () => {
               </div>
             )}
 
-            {/* Load More Button (for pagination simulation) */}
-            {filteredProducts.length > 0 && filteredProducts.length >= 12 && (
-              <div className="text-center mt-12">
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-12 space-x-2">
                 <Button
                   variant="outline"
-                  size="lg"
-                  className="px-8"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1 || loading}
                 >
-                  Load More Products
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    if (pageNum > totalPages) return null;
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={pageNum === currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNum)}
+                        disabled={loading}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages || loading}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             )}

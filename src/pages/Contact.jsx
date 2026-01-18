@@ -14,8 +14,11 @@ const Contact = () => {
 
         <div className="p-6 bg-white rounded-lg shadow">
           <h3 className="text-lg font-semibold">Head Office</h3>
-          <p className="mt-2 text-gray-700">H#1024, Danober Goli, Manda, Mugda, Dhaka-1214</p>
-          <p className="mt-3 text-gray-700">Business inquiries: <a className="text-orange-600" href="mailto:halchashdaily@gmail.com">halchashdaily@gmail.com</a></p>
+          <p className="mt-2 text-gray-700">1024, SOUTH MANDA, MUGDA, DHAKA</p>
+          <p className="mt-3 text-gray-700">Business inquiries: <a className="text-orange-600" href="mailto:Halchashdaily@gmail.com">Halchashdaily@gmail.com</a></p>
+          <p className="mt-2 text-gray-700">
+            Messenger: <a className="text-orange-600" href="https://www.facebook.com/share/18HKCEPaca/" target="_blank" rel="noopener noreferrer">Contact us on Messenger</a>
+          </p>
         </div>
       </div>
 

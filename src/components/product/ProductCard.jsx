@@ -110,6 +110,7 @@ const ProductCard = ({ product, index = 0 }) => {
           <img
             src={product.image}
             alt={product.name}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
         </div>
@@ -138,7 +139,7 @@ const ProductCard = ({ product, index = 0 }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-3 space-y-2 flex-1 flex flex-col">
+      <div className="p-4 space-y-3 flex-1 flex flex-col">
         {/* Category */}
         <div className="flex items-center justify-between text-xs">
           <span className="text-gray-500 uppercase tracking-wide font-medium truncate">
@@ -147,12 +148,12 @@ const ProductCard = ({ product, index = 0 }) => {
           {product.inStock ? (
             <span className="text-green-600 font-medium whitespace-nowrap">In Stock</span>
           ) : (
-            <span className="text-red-600 font-medium whitespace-nowrap">Out</span>
+            <span className="text-red-600 font-medium whitespace-nowrap">Out of Stock</span>
           )}
         </div>
 
         {/* Product Name */}
-        <h3 className="font-semibold text-gray-800 line-clamp-2 group-hover:text-emerald-600 transition-colors text-sm">
+        <h3 className="font-semibold text-gray-800 line-clamp-2 group-hover:text-red-600 transition-colors text-sm leading-tight">
           {product.name}
         </h3>
 
@@ -176,46 +177,32 @@ const ProductCard = ({ product, index = 0 }) => {
         </div>
 
         {/* Price */}
-        <div className="flex items-center space-x-2">
-          <span className="text-base font-bold text-emerald-600">
-            ৳{product.discountPrice || product.price}
-          </span>
-          {product.discountPrice && (
-            <span className="text-xs text-gray-400 line-through">
-              ৳{product.price}
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <span className="text-lg font-bold text-red-600">
+              ৳{product.discountPrice || product.price}
             </span>
-          )}
-        </div>
-
-        {/* Features - Hidden on mobile */}
-        {product.features && product.features.length > 0 && (
-          <div className="hidden md:flex flex-wrap gap-1">
-            {product.features.slice(0, 1).map((feature, index) => (
-              <span
-                key={index}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-              >
-                {feature}
-              </span>
-            ))}
-            {product.features.length > 1 && (
-              <span className="text-xs text-gray-500">
-                +{product.features.length - 1}
+            {product.discountPrice && (
+              <span className="text-sm text-gray-400 line-through">
+                ৳{product.price}
               </span>
             )}
           </div>
-        )}
+          {product.discountPrice && (
+            <div className="text-xs text-green-600 font-medium">
+              You save ৳{product.price - product.discountPrice}
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
-        <div className="space-y-1.5 mt-auto">
+        <div className="space-y-2 mt-auto">
           <Button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1.5 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            <ShoppingCart className="w-3 h-3 mr-1" />
-            <span className="hidden md:inline">Add to Cart</span>
-            <span className="md:hidden">Add</span>
+            Add To Cart
           </Button>
           <Button
             onClick={(e) => {
@@ -224,11 +211,9 @@ const ProductCard = ({ product, index = 0 }) => {
               navigate(`/checkout?productId=${product.id}&quantity=1`);
             }}
             disabled={!product.inStock}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            <Zap className="w-3 h-3 mr-1" />
-            <span className="hidden md:inline">Order Now</span>
-            <span className="md:hidden">Buy</span>
+            Order Now
           </Button>
         </div>
       </div>

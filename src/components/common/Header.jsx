@@ -1,50 +1,57 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Heart, Home, Truck, Star, ShoppingBag } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, Heart, Menu, X, User, Phone, Truck, RotateCcw, Headphones, CreditCard } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { useProducts } from '../../context/ProductContext';
 
 const Header = () => {
-  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { getCartItemsCount } = useCart();
-  const { user, logout } = useAuth();
-  const { wishlistItems } = useWishlist();
-  const { categories: categoryList } = useProducts();
-  const categories = categoryList ?? [];
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+  const { cart } = useCart();
+  const { user } = useAuth();
+  const { wishlist } = useWishlist();
+  const { categories } = useProducts();
+
+  const features = [
+    { icon: Truck, text: 'Fast Delivery', subtext: 'Anywhere in Bangladesh' },
+    { icon: RotateCcw, text: 'Easy Returns', subtext: 'Within 7 days' },
+    { icon: Headphones, text: '24/7 Support', subtext: 'Customer care' },
+    { icon: CreditCard, text: 'Cash on Delivery', subtext: 'Pay after delivery' }
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/products');
+      setSearchQuery('');
     }
   };
 
-  const handleCategoryClick = (categoryId) => {
-    navigate(`/products?category=${categoryId}`);
-    setIsMenuOpen(false);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
-  const features = [
-    { icon: Truck, text: "Free Delivery", subtext: "On orders over ৳500" },
-    { icon: Star, text: "Authentic Products", subtext: "100% Genuine Bengali Items" },
-    { icon: ShoppingBag, text: "Easy Returns", subtext: "7-day return policy" }
-  ];
+  const cartItemCount = cart?.items?.length || 0;
+  const wishlistItemCount = wishlist?.length || 0;
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className={`bg-red-600 text-white sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
       {/* Top Bar with Features */}
-      <div className="bg-emerald-600 text-white py-2 px-4">
-        <div className="container mx-auto">
-          {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+      <div className="bg-red-700 py-2">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center space-x-6 overflow-x-auto">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -70,237 +77,169 @@ const Header = () => {
           <div className="flex items-center">
             <button
               onClick={() => navigate('/')}
-              className="bg-orange-500 text-white px-3 py-2 rounded-lg font-bold text-xl hover:bg-orange-600 transition-colors flex items-center gap-2"
-              aria-label="Go to home"
+              className="text-2xl font-bold hover:text-red-200 transition-colors"
             >
-              <Home className="w-5 h-5" />
-              Halchash
+              halchash.com
             </button>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="flex w-full">
-              <Input
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="hover:text-red-200 transition-colors font-medium">
+              Home
+            </Link>
+            <div className="relative group">
+              <button className="hover:text-red-200 transition-colors font-medium flex items-center">
+                Categories
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="py-2">
+                  {categories?.slice(0, 8).map((category) => (
+                    <Link
+                      key={category._id}
+                      to={`/products?category=${category._id}`}
+                      className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <Link to="/wishlist" className="hover:text-red-200 transition-colors font-medium">
+              Wishlist
+            </Link>
+            <a href="tel:01911880502" className="hover:text-red-200 transition-colors font-medium flex items-center">
+              <Phone className="w-4 h-4 mr-2" />
+              Call Now
+            </a>
+          </nav>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md mx-4">
+            <form onSubmit={handleSearch} className="relative">
+              <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-r-none border-r-0"
+                className="w-full px-4 py-2 pl-10 pr-4 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-300"
               />
-              <Button 
-                type="submit"
-                className="rounded-l-none bg-orange-500 hover:bg-orange-600"
-              >
-                <Search className="w-4 h-4" />
-              </Button>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             </form>
           </div>
 
-          {/* Right Side Icons */}
+          {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Wishlist */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden md:flex items-center"
-              onClick={() => navigate('/profile')}
+            <Link
+              to="/wishlist"
+              className="relative p-2 hover:bg-red-700 rounded-full transition-colors"
             >
-              <Heart className="w-5 h-5 mr-1" />
-              <span className="text-sm">{wishlistItems.length} Wishlist</span>
-            </Button>
-
-            {/* Cart */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/cart')}
-              className="flex items-center relative"
-            >
-              <ShoppingCart className="w-5 h-5 mr-1" />
-              <span className="text-sm hidden md:block">৳0</span>
-              {getCartItemsCount() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {getCartItemsCount()}
+              <Heart className="w-5 h-5" />
+              {wishlistItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-white text-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {wishlistItemCount}
                 </span>
               )}
-            </Button>
+            </Link>
 
-            {/* Account */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hidden md:flex items-center"
-              onClick={() => user ? navigate('/profile') : navigate('/auth')}
+            {/* Cart */}
+            <Link
+              to="/cart"
+              className="relative p-2 hover:bg-red-700 rounded-full transition-colors"
             >
-              <User className="w-5 h-5 mr-1" />
-              <span className="text-sm">
-                {user ? user.name : 'Account'}
-              </span>
-            </Button>
+              <ShoppingCart className="w-5 h-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-white text-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
 
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            {/* User Account */}
+            {user ? (
+              <Link
+                to="/profile"
+                className="p-2 hover:bg-red-700 rounded-full transition-colors"
+              >
+                <User className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className="px-4 py-2 bg-white text-red-600 rounded-full font-medium hover:bg-red-50 transition-colors"
+              >
+                Login
+              </Link>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden p-2 hover:bg-red-700 rounded-full transition-colors"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            </button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden mt-4">
-          <form onSubmit={handleSearch} className="flex">
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-r-none border-r-0"
-            />
-            <Button 
-              type="submit"
-              className="rounded-l-none bg-orange-500 hover:bg-orange-600"
-            >
-              <Search className="w-4 h-4" />
-            </Button>
-          </form>
-        </div>
-      </div>
-
-      {/* Navigation Categories */}
-      <div className="bg-emerald-600 text-white">
-        <div className="container mx-auto px-4">
-          <div className="hidden md:flex items-center space-x-1 py-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/products')}
-              className="text-white hover:bg-emerald-700 text-sm px-3 py-2 rounded-none"
-            >
-              All Products
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant="ghost"
-                size="sm"
-                onClick={() => handleCategoryClick(category.id)}
-                className="text-white hover:bg-emerald-700 text-sm px-3 py-2 rounded-none"
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t border-red-500 pt-4">
+            <nav className="flex flex-col space-y-4">
+              <Link
+                to="/"
+                className="hover:text-red-200 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
               >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="container mx-auto px-4 py-4">
-            <div className="space-y-4">
-              {/* Mobile Categories */}
+                Home
+              </Link>
               <div className="space-y-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    navigate('/');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full justify-start text-left font-semibold"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
-                </Button>
-                <h3 className="font-semibold text-gray-800 pt-2">Categories</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    navigate('/products');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full justify-start text-left"
-                >
-                  All Products
-                </Button>
-                {categories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCategoryClick(category.id)}
-                    className="w-full justify-start text-left"
-                  >
-                    {category.name}
-                  </Button>
-                ))}
-              </div>
-
-              {/* Mobile Account Actions */}
-              <div className="border-t pt-4 space-y-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    navigate('/profile');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  Wishlist ({wishlistItems.length})
-                </Button>
-                {user ? (
-                  <>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        navigate('/profile');
-                        setIsMenuOpen(false);
-                      }}
+                <div className="font-medium text-red-200">Categories</div>
+                <div className="pl-4 space-y-1">
+                  {categories?.slice(0, 6).map((category) => (
+                    <Link
+                      key={category._id}
+                      to={`/products?category=${category._id}`}
+                      className="block text-sm hover:text-red-200 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <User className="w-4 h-4 mr-2" />
-                      My Profile
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start text-red-600"
-                      onClick={() => {
-                        logout();
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      Logout
-                    </Button>
-                  </>
-                ) : (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start"
-                    onClick={() => {
-                      navigate('/auth');
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
-                )}
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+              <Link
+                to="/wishlist"
+                className="hover:text-red-200 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Wishlist ({wishlistItemCount})
+              </Link>
+              <a
+                href="tel:01911880502"
+                className="hover:text-red-200 transition-colors font-medium flex items-center"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Call Now
+              </a>
+              {!user && (
+                <Link
+                  to="/auth"
+                  className="px-4 py-2 bg-white text-red-600 rounded-full font-medium hover:bg-red-50 transition-colors text-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
+            </nav>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 };

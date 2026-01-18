@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Truck, RotateCcw, Headphones, CreditCard, Phone, Mail, MapPin } from 'lucide-react';
+import { Truck, RotateCcw, Headphones, CreditCard, Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { useProducts } from '../../context/ProductContext';
 
 const Footer = () => {
+  const { categories } = useProducts();
   const features = [
     {
       icon: Truck,
@@ -27,35 +29,32 @@ const Footer = () => {
   ];
 
   const quickLinks = [
-    { label: 'About Us', to: '/about' },
+    { label: 'Home', to: '/' },
     { label: 'Contact Us', to: '/contact' },
-    { label: 'FAQ', to: '/faq' },
-    { label: 'Shipping Info', to: '/shipping' },
-    { label: 'Returns', to: '/returns' },
-    { label: 'Size Guide', to: '/size-guide' },
-    { label: 'Privacy Policy', to: '/privacy' },
-    { label: 'Terms of Service', to: '/terms' }
+    { label: 'Wishlist', to: '/wishlist' }
   ];
 
-  const categories = [
-    'Shari & Clothing', 'Beauty Products', 'Personal Care', 
-    'Food & Nutrition', 'Home & Garden', 'Traditional Items'
+  const information = [
+    { label: 'Delivery Policy', to: '/delivery-policy' },
+    { label: 'Privacy Policy', to: '/privacy' },
+    { label: 'Return Policy', to: '/returns' },
+    { label: 'About Us', to: '/about' }
   ];
 
   return (
-    <footer className="bg-gray-50 mt-16">
+    <footer className="bg-gray-100 mt-16">
       {/* Features Section */}
-      <div className="bg-white py-8 border-b">
+      <div className="bg-red-600 text-white py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div className="bg-emerald-100 p-3 rounded-full">
-                  <feature.icon className="w-6 h-6 text-emerald-600" />
+              <div key={index} className="flex items-center space-x-3">
+                <div className="bg-white/20 p-2 rounded-full">
+                  <feature.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">{feature.title}</h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
+                  <h3 className="font-semibold text-sm">{feature.title}</h3>
+                  <p className="text-xs opacity-90">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -64,125 +63,141 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div>
-            <div className="flex items-center mb-4">
-              <div className="bg-orange-500 text-white px-3 py-2 rounded-lg font-bold text-xl">
-                Halchash
+      <div className="bg-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-2xl font-bold text-red-600 mb-2">Halchash</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Halchash is a leading online pharmacy and healthcare store, offering a wide range of medicines, supplements, and wellness products. We ensure authentic products, competitive pricing, and reliable delivery across Bangladesh.
+                </p>
               </div>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Your one-stop destination for authentic Bengali products. We're committed to providing exceptional shopping experiences with quality products at unbeatable prices.
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-start text-gray-600">
-                <MapPin className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
-                <div className="text-sm">
-                  <p className="font-medium mb-1">Address 1:</p>
-                  <p>Mugdha, Manda Chata Mashjid, Motijheel, Dhaka</p>
+
+              {/* Contact Info */}
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2 text-sm text-gray-600">
+                  <MapPin className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <span>1024, SOUTH MANDA, MUGDA, DHAKA</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Phone className="w-4 h-4 text-red-600" />
+                  <span>01911880502</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Mail className="w-4 h-4 text-red-600" />
+                  <span>Halchashdaily@gmail.com</span>
                 </div>
               </div>
-              <div className="flex items-start text-gray-600">
-                <MapPin className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
-                <div className="text-sm">
-                  <p className="font-medium mb-1">Address 2:</p>
-                  <p>Kalukhali, Rajbari, Dhaka</p>
-                </div>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Phone className="w-4 h-4 mr-2" />
-                <a href="tel:01742060566" className="text-sm hover:text-emerald-600 transition-colors">01742060566</a>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Mail className="w-4 h-4 mr-2" />
-                <span className="text-sm">support@halchash.com</span>
-              </div>
             </div>
-          </div>
 
-          {/* Categories */}
-          <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Categories</h3>
-            <ul className="space-y-2">
-              {categories.map((category, index) => (
-                <li key={index}>
-                  <a href="#" className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
-                    {category}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-4">QUICK LINK</h4>
+              <ul className="space-y-2">
+                {quickLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      to={link.to}
+                      className="text-gray-600 hover:text-red-600 text-sm transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {quickLinks.slice(0, 6).map((link, index) => (
-                <li key={index}>
-                  <Link to={link.to} className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Information */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-4">INFORMATION</h4>
+              <ul className="space-y-2">
+                {information.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      to={link.to}
+                      className="text-gray-600 hover:text-red-600 text-sm transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Customer Service */}
-          <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Customer Service</h3>
-            <ul className="space-y-2">
-              {quickLinks.slice(6).map((link, index) => (
-                <li key={index}>
-                  <Link to={link.to} className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            
-            {/* Contact Buttons */}
-            <div className="mt-6 space-y-2">
-              <a 
-                href="https://www.facebook.com/sirobin.sajeeb/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block bg-blue-600 text-white text-center py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
-              >
-                Messenger কল দিন
-              </a>
-              <a 
-                href="tel:01742060566" 
-                className="block bg-green-600 text-white text-center py-2 px-4 rounded text-sm hover:bg-green-700 transition-colors"
-              >
-                সরাসরি কল দিন
-              </a>
-              <a 
-                href="https://wa.me/8801742060566" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block bg-emerald-600 text-white text-center py-2 px-4 rounded text-sm hover:bg-emerald-700 transition-colors"
-              >
-                WhatsApp করুন
-              </a>
+            {/* Categories */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-4">CATEGORIES</h4>
+              <ul className="space-y-2">
+                {categories?.slice(0, 8).map((category) => (
+                  <li key={category._id}>
+                    <Link
+                      to={`/products?category=${category._id}`}
+                      className="text-gray-600 hover:text-red-600 text-sm transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="bg-gray-800 text-white py-4">
+      {/* Payment & Shipping Partners */}
+      <div className="bg-gray-50 py-8 border-t">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-300">
-              © 2024 Halchash. All rights reserved.
-            </p>
-            <div className="flex space-x-4 mt-2 md:mt-0">
-              <Link to="/privacy" className="text-gray-300 hover:text-white text-sm">Privacy Policy</Link>
-              <Link to="/terms" className="text-gray-300 hover:text-white text-sm">Terms of Service</Link>
-              <Link to="/privacy" className="text-gray-300 hover:text-white text-sm">Cookie Policy</Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Payment Systems */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-4">Payment System:</h4>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded text-sm font-medium">bKash</div>
+                <div className="bg-pink-500 text-white px-3 py-1 rounded text-sm font-medium">Nagad</div>
+                <div className="bg-purple-500 text-white px-3 py-1 rounded text-sm font-medium">Rocket</div>
+                <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium">Visa</div>
+              </div>
+            </div>
+
+            {/* Shipping Partners */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-4">Shipping Partner:</h4>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-red-500 text-white px-3 py-1 rounded text-sm font-medium">Pathao</div>
+                <div className="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium">RedX</div>
+                <div className="bg-blue-500 text-white px-3 py-1 rounded text-sm font-medium">Steadfast</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Social Links & Copyright */}
+      <div className="bg-gray-800 text-white py-6">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm">Our Social Links:</span>
+              <div className="flex space-x-3">
+                <a href="https://facebook.com" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="https://instagram.com" className="text-gray-400 hover:text-pink-400 transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="https://youtube.com" className="text-gray-400 hover:text-red-400 transition-colors">
+                  <Youtube className="w-5 h-5" />
+                </a>
+                <a href="https://www.facebook.com/share/18HKCEPaca/" className="text-gray-400 hover:text-blue-400 transition-colors" target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-400">
+              Halchash.com © all rights reserved
             </div>
           </div>
         </div>
