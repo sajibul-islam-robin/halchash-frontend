@@ -81,10 +81,24 @@ const HeroSection = () => {
           setHeroProducts([]);
         } else {
           const slides = sourceProducts.map((product) => {
-            const productImage =
+            // Get the image path from product
+            let productImage =
               product.images && product.images.length > 0
                 ? product.images[0]
-                : product.image;
+                : product.image || '';
+
+            // Construct full image URL if it's a relative path
+            if (productImage) {
+              if (productImage.startsWith('http://') || productImage.startsWith('https://')) {
+                // Already a full URL
+              } else if (productImage.startsWith('/')) {
+                // Relative path starting with /
+                productImage = `${API_BASE_URL}${productImage}`;
+              } else {
+                // Relative path without /
+                productImage = `${API_BASE_URL}/${productImage}`;
+              }
+            }
 
             const categorySlug = product.category_id?.slug || product.category || 'shari';
 
@@ -94,7 +108,7 @@ const HeroSection = () => {
               subtitle: (product.name || 'Special Product').toUpperCase().split(' ').slice(2).join(' ') || 'PRODUCT',
               description: product.discount ? `${product.discount}% OFF` : 'DISCOUNT',
               ctaText: 'ORDER NOW',
-              image: productImage,
+              image: productImage || '/api/placeholder/600/400',
               discount: product.discount ? `${product.discount}%` : '50%',
               bgColor: categoryColors[categorySlug] || 'from-purple-900 via-red-900 to-black',
               category: categorySlug,
@@ -161,28 +175,28 @@ const HeroSection = () => {
   }
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className="relative h-screen overflow-hidden" style={{ minHeight: '100vh', height: '100vh' }}>
       {/* Hero Slider */}
-      <div className="relative h-full">
-        <AnimatePresence mode="wait">
+      <div className="relative h-full w-full" style={{ height: '100%', position: 'relative' }}>
+        <AnimatePresence initial={false}>
           {heroProducts.map((slide, index) => (
             index === currentSlide && (
               <motion.div
                 key={slide.id}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.7 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
                 className={`absolute inset-0 bg-gradient-to-r ${slide.bgColor} flex items-center`}
+                style={{ 
+                  willChange: 'opacity',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden'
+                }}
               >
                 <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full">
                   {/* Content */}
-                  <motion.div
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                    className="text-white space-y-6"
-                  >
+                  <div className="text-white space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-5xl md:text-7xl font-bold leading-tight">
                         {slide.title}
@@ -222,20 +236,22 @@ const HeroSection = () => {
                         <Heart className="w-5 h-5" />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
 
                   {/* Image */}
-                  <motion.div
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 0.8 }}
-                    className="flex justify-center lg:justify-end"
-                  >
+                  <div className="flex justify-center lg:justify-end">
                     <div className="relative">
                       <img
                         src={slide.image}
                         alt={slide.title}
-                        className="w-full max-w-md h-auto object-cover rounded-lg shadow-2xl"
+                        className="w-full max-w-md h-auto rounded-lg shadow-2xl"
+                        style={{ 
+                          display: 'block',
+                          maxHeight: '500px',
+                          objectFit: 'contain',
+                          width: '100%',
+                          height: 'auto'
+                        }}
                         onError={(e) => {
                           e.target.src = '/api/placeholder/600/400';
                         }}
@@ -244,7 +260,7 @@ const HeroSection = () => {
                         {slide.discount}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </motion.div>
             )
@@ -290,11 +306,8 @@ const HeroSection = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((stat, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
                 className="text-center text-white"
               >
                 <div className="text-2xl md:text-3xl font-bold text-red-400">
@@ -303,7 +316,7 @@ const HeroSection = () => {
                 <div className="text-sm md:text-base text-gray-300">
                   {stat.label}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
